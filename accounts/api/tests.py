@@ -1,6 +1,5 @@
-from django.test import TestCase
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
+from testing.testcases import TestCase
 
 
 LOGIN_URL = '/api/accounts/login/'
@@ -14,16 +13,11 @@ class AccountApiTests(TestCase):
     def setUp(self):
         # 这个函数会在每个 test function 执行的时候被执行
         self.client = APIClient()
-        self.user = self.createUser(
+        self.user = self.create_user(
             username='admin',
-            email='admin@jiuzhang.com',
+            email='admin@twitterme.com',
             password='correct password',
         )
-
-    def createUser(self, username, email, password):
-        # 不能写成 User.objects.create()
-        # 因为 password 需要被加密, username 和 email 需要进行一些 normalize 处理
-        return User.objects.create_user(username, email, password)
 
     def test_login(self):
         # 每个测试函数必须以 test_ 开头，才会被自动调用进行测试
@@ -81,7 +75,7 @@ class AccountApiTests(TestCase):
     def test_signup(self):
         data = {
             'username': 'someone',
-            'email': 'someone@jiuzhang.com',
+            'email': 'someone@twitterme.com',
             'password': 'any password',
         }
         # 测试 get 请求失败
@@ -100,7 +94,7 @@ class AccountApiTests(TestCase):
         # 测试密码太短
         response = self.client.post(SIGNUP_URL, {
             'username': 'someone',
-            'email': 'someone@jiuzhang.com',
+            'email': 'someone@twitterme.com',
             'password': '123',
         })
         # print(response.data)
@@ -109,7 +103,7 @@ class AccountApiTests(TestCase):
         # 测试用户名太长
         response = self.client.post(SIGNUP_URL, {
             'username': 'username is tooooooooooooooooo loooooooong',
-            'email': 'someone@jiuzhang.com',
+            'email': 'someone@twitterme.com',
             'password': 'any password',
         })
         # print(response.data)

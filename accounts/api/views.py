@@ -89,7 +89,7 @@ class AccountViewSet(viewsets.ViewSet):
         """
         使用 username, email, password 进行注册
         """
-        # 不太优雅的写法
+        # 不太优雅的写法 simplify entry method
         # username = request.data.get('username')
         # if not username:
         #     return Response("username required", status=400)
