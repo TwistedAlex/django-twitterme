@@ -18,9 +18,9 @@ class FriendshipSerializerForCreate(serializers.ModelSerializer):
             raise ValidationError({
                 'message': 'You can not follow yourself.'
             })
-        # move the validation part in views.py follow method into the
+        # move the validation part in api.views.py follow method into the
         # serializer.py, however, Meta will check whether duplicates exist
-        # the following part is replaced by get_object in views.py
+        # the following part is replaced by get_object in api.views.py
         # if not User.objects.filter(id=attrs['to_user_id']).exists():
         #     raise ValidationError({
         #         'message': 'The user you are following does not exist.'
