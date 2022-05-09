@@ -37,9 +37,12 @@ class TweetViewSet(viewsets.GenericViewSet,
         # order by created_at desc
         # 这句 SQL 查询会用到 user 和 created_at 的联合索引
         # 单纯的 user 索引是不够的
-        tweets = Tweet.objects.filter(
-            user_id=request.query_params['user_id']
-        ).order_by('-created_at')
+
+        # improvement 1: prefetch_related, get rid of N + 1 queries problem
+        # improvement 2: cache
+        tweets = Tweet.objects.filter(user_id=request.query_params['user_id'])\
+            .prefetch_related('user')\
+            .order_by('-created_at')
         serializer = TweetSerializerForList(tweets, many=True)
         # 一般来说 json 格式的 response 默认都要用 hash 的格式
         # 而不能用 list 的格式（约定俗成）

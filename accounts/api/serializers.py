@@ -37,11 +37,17 @@ class SignupSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError({
                 'message': 'This email address has been occupied.'
             })
-        return data
+        validated_data = dict(data)
+        validated_data['username'] = validated_data['username'].lower()
+        validated_data['email'] = validated_data['email'].lower()
+
+        return validated_data
 
     def create(self, validated_data):
-        username = validated_data['username'].lower()
-        email = validated_data['email'].lower()
+        # username = validated_data['username'].lower()
+        # email = validated_data['email'].lower()
+        username = validated_data['username']
+        email = validated_data['email']
         password = validated_data['password']
 
         user = User.objects.create_user(
