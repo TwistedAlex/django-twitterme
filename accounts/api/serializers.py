@@ -14,6 +14,10 @@ class UserSerializerForTweet(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
+class UserSerializerForComment(UserSerializerForTweet):
+    pass
+
+
 class UserSerializerForFriendship(UserSerializerForTweet):
     pass
 
