@@ -31,7 +31,6 @@ class CommentApiTests(TestCase):
         # 只带 tweet_id 不行
         response = self.alex_client.post(COMMENT_URL, {'tweet_id': self.tweet.id})
         self.assertEqual(response.status_code, 400)
-        # check the last 4 lines: assertEqual(response.data['...'], )
 
         # 只带 content 不行
         response = self.alex_client.post(COMMENT_URL, {'content': '1'})
