@@ -1,3 +1,4 @@
+from accounts.models import UserProfile
 from testing.testcases import TestCase
 
 
@@ -111,6 +112,10 @@ class AccountApiTests(TestCase):
         response = self.anonymous_client.post(SIGNUP_URL, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['user']['username'], 'someone')
+        # 验证 user profile 已经被创建
+        created_user_id = response.data['user']['id']
+        profile = UserProfile.objects.filter(user_id=created_user_id).first()
+        self.assertNotEqual(profile, None)
         # 验证用户已经登入
         response = self.anonymous_client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.data['has_logged_in'], True)
