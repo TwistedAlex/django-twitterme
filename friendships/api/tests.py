@@ -12,6 +12,7 @@ FOLLOWINGS_URL = '/api/friendships/{}/followings/'
 class FriendshipApiTests(TestCase):
 
     def setUp(self):
+        self.clear_cache()
         self.alex = self.create_user('alex')
         self.alex_client = APIClient()
         self.alex_client.force_authenticate(self.alex)
@@ -49,8 +50,8 @@ class FriendshipApiTests(TestCase):
         self.assertEqual(response.data['user']['username'], self.alex.username)
         # 重复 follow original logic:静默成功 duplicate=True modified:400
         response = self.bob_client.post(url)
-        self.assertEqual(response.status_code, 400)
-        # self.assertEqual(response.data['duplicate'], True)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['duplicate'], True)
         # 反向关注会创建新的数据
         count = Friendship.objects.count()
         response = self.alex_client.post(FOLLOW_URL.format(self.bob.id))

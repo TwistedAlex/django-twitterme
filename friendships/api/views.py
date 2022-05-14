@@ -5,6 +5,7 @@ from friendships.api.serializers import (
     FollowerSerializer,
     FriendshipSerializerForCreate,
 )
+from friendships.services import FriendshipService
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -43,11 +44,11 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         self.get_object()
         # 特殊判断重复 follow 的情况（比如前端猛点好多少次 follow)
         # 静默处理，不报错，因为这类重复操作因为网络延迟的原因会比较多，没必要当做错误处理
-        # if Friendship.objects.filter(from_user=request.user, to_user=pk).exists():
-        #     return Response({
-        #         'success': True,
-        #         'duplicate': True,
-        #     }, status=status.HTTP_201_CREATED)
+        if Friendship.objects.filter(from_user=request.user, to_user=pk).exists():
+            return Response({
+                'success': True,
+                'duplicate': True,
+            }, status=status.HTTP_201_CREATED)
         # create friendship object
         serializer = FriendshipSerializerForCreate(data={
             'from_user_id': request.user.id,
@@ -99,6 +100,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         ).delete()
         # TODO: remove newsfeeds for new followers; remove tweets from pk to id
         # NewsFeedSerice.remove_newsfeds(request.user.id, pk)
+        FriendshipService.invalidate_following_cache(request.user.id)
         return Response({'success': True, 'deleted': deleted})
 
     def list(self, request):
