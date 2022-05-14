@@ -116,25 +116,47 @@ class NewsFeedApiTests(TestCase):
         profile = self.bob.profile
         profile.nickname = 'huanglaoxie'
         profile.save()
-    
+
         self.assertEqual(self.alex.username, 'alex')
         self.create_newsfeed(self.bob, self.create_tweet(self.alex))
         self.create_newsfeed(self.bob, self.create_tweet(self.bob))
-    
+
         response = self.bob_client.get(NEWSFEEDS_URL)
         results = response.data['results']
         self.assertEqual(results[0]['tweet']['user']['username'], 'bob')
         self.assertEqual(results[0]['tweet']['user']['nickname'], 'huanglaoxie')
         self.assertEqual(results[1]['tweet']['user']['username'], 'alex')
-    
+
         self.alex.username = 'alexchong'
         self.alex.save()
         profile.nickname = 'huangyaoshi'
         profile.save()
-    
+
         response = self.bob_client.get(NEWSFEEDS_URL)
         results = response.data['results']
         self.assertEqual(results[0]['tweet']['user']['username'], 'bob')
         self.assertEqual(results[0]['tweet']['user']['nickname'], 'huangyaoshi')
         self.assertEqual(results[1]['tweet']['user']['username'], 'alexchong')
-    
+
+    def test_tweet_cache(self):
+        tweet = self.create_tweet(self.alex, 'content1')
+        self.create_newsfeed(self.bob, tweet)
+        response = self.bob_client.get(NEWSFEEDS_URL)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], 'alex')
+        self.assertEqual(results[0]['tweet']['content'], 'content1')
+
+        # update username
+        self.alex.username = 'alexchong'
+        self.alex.save()
+        response = self.bob_client.get(NEWSFEEDS_URL)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], 'alexchong')
+
+        # update content
+        tweet.content = 'content2'
+        tweet.save()
+        response = self.bob_client.get(NEWSFEEDS_URL)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['content'], 'content2')
+
