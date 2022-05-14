@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
-from friendships.models import Friendship
 from friendships.api.serializers import (
     FollowingSerializer,
     FollowerSerializer,
     FriendshipSerializerForCreate,
 )
+from friendships.models import Friendship
 from friendships.services import FriendshipService
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -72,6 +72,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         instance = serializer.save()
         # TODO: inject newsfeeds for new followers; inject tweets from pk to id
         # NewsFeedSerice.inject_newsfeds(request.user.id, pk)
+        # FriendshipService.invalidate_following_cache(request.user.id)
         return Response(
             FollowingSerializer(instance, context={'request': request}).data,
             status=status.HTTP_201_CREATED
@@ -100,7 +101,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         ).delete()
         # TODO: remove newsfeeds for new followers; remove tweets from pk to id
         # NewsFeedSerice.remove_newsfeds(request.user.id, pk)
-        FriendshipService.invalidate_following_cache(request.user.id)
+        # FriendshipService.invalidate_following_cache(request.user.id)
         return Response({'success': True, 'deleted': deleted})
 
     def list(self, request):

@@ -13,6 +13,7 @@ FOLLOW_URL = '/api/friendships/{}/follow/'
 class NewsFeedApiTests(TestCase):
 
     def setUp(self):
+        self.clear_cache()
         self.alex = self.create_user('alex')
         self.alex_client = APIClient()
         self.alex_client.force_authenticate(self.alex)
@@ -20,6 +21,15 @@ class NewsFeedApiTests(TestCase):
         self.bob = self.create_user('bob')
         self.bob_client = APIClient()
         self.bob_client.force_authenticate(self.bob)
+        
+        # create followings and followers for bob
+        for i in range(2):
+            follower = self.create_user('bob_follower{}'.format(i))
+            Friendship.objects.create(from_user=follower, to_user=self.bob)
+        for i in range(3):
+            following = self.create_user('bob_following{}'.format(i))
+            Friendship.objects.create(from_user=self.bob, to_user=following)
+
 
     def test_list(self):
         # anonymous client需要登录
@@ -101,3 +111,30 @@ class NewsFeedApiTests(TestCase):
         self.assertEqual(response.data['has_next_page'], False)
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['id'], new_newsfeed.id)
+
+    def test_user_cache(self):
+        profile = self.bob.profile
+        profile.nickname = 'huanglaoxie'
+        profile.save()
+    
+        self.assertEqual(self.alex.username, 'alex')
+        self.create_newsfeed(self.bob, self.create_tweet(self.alex))
+        self.create_newsfeed(self.bob, self.create_tweet(self.bob))
+    
+        response = self.bob_client.get(NEWSFEEDS_URL)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], 'bob')
+        self.assertEqual(results[0]['tweet']['user']['nickname'], 'huanglaoxie')
+        self.assertEqual(results[1]['tweet']['user']['username'], 'alex')
+    
+        self.alex.username = 'alexchong'
+        self.alex.save()
+        profile.nickname = 'huangyaoshi'
+        profile.save()
+    
+        response = self.bob_client.get(NEWSFEEDS_URL)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], 'bob')
+        self.assertEqual(results[0]['tweet']['user']['nickname'], 'huangyaoshi')
+        self.assertEqual(results[1]['tweet']['user']['username'], 'alexchong')
+    
