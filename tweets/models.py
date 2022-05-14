@@ -1,3 +1,4 @@
+from accounts.services import UserService
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -35,6 +36,9 @@ class Tweet(models.Model):
         # 执行 print(tweet instance) 的时候会显示的内容
         return f'{self.created_at} {self.user}: {self.content}'
 
+    @property
+    def cached_user(self):
+        return UserService.get_user_through_cache(self.user_id)
 
 class TweetPhoto(models.Model):
     # 图片在哪个 Tweet 下面
