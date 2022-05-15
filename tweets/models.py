@@ -9,6 +9,7 @@ from utils.listeners import invalidate_object_cache
 from utils.memcached_helper import MemcachedHelper
 from utils.time_helpers import utc_now
 
+
 class Tweet(models.Model):
     user = models.ForeignKey(
         User,
@@ -19,8 +20,11 @@ class Tweet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # same table different attrs has different modifying rate
     # split them into different tables
-    # likes_count = models.IntegerField(default=0, null=True)
-    # comments_count = models.IntegerField(default=0, null=True)
+    # 新增的 field 一定要设置 null=True，否则 default = 0 会遍历整个表单去设置
+    # 导致 Migration 过程非常慢，从而把整张表单锁死，从而正常用户无法创建新的 tweets
+    # 原有的数据需要在数据迁移后，用额外的回填脚本把 0 填上，这样不会锁死表单
+    likes_count = models.IntegerField(default=0, null=True)
+    comments_count = models.IntegerField(default=0, null=True)
 
     class Meta:
         index_together = (('user', 'created_at'),)
