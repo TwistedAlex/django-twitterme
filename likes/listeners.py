@@ -1,3 +1,6 @@
+from utils.redis_helper import RedisHelper
+
+
 def incr_likes_count(sender, instance, created, **kwargs):
     from tweets.models import Tweet
     from django.db.models import F
@@ -24,6 +27,8 @@ def incr_likes_count(sender, instance, created, **kwargs):
 
     # 方法 1
     Tweet.objects.filter(id=instance.object_id).update(likes_count=F('likes_count') + 1)
+    tweet = instance.content_object
+    RedisHelper.incr_count(tweet, 'likes_count')
     # 想要 likes_count 的更新不要与 tweet 的更新绑在一起，否则 cache 会一直 miss
     # 不想让它触发 tweet 的 post_save 逻辑，就不需要 invalidate_object_cache
 
@@ -39,8 +44,10 @@ def decr_likes_count(sender, instance, **kwargs):
 
     model_class = instance.content_type.model_class()
     if model_class != Tweet:
-        # TODO: HOMEWORK 给 Comment 使用类似的方法进行 likes_count 的统计
+        # TODO: 给 Comment 使用类似的方法进行 likes_count 的统计
         return
 
     # handle tweet likes cancel
     Tweet.objects.filter(id=instance.object_id).update(likes_count=F('likes_count') - 1)
+    tweet = instance.content_object
+    RedisHelper.decr_count(tweet, 'likes_count')
