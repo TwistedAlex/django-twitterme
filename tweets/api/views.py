@@ -12,9 +12,7 @@ from utils.decorators import required_params
 from utils.paginations import EndlessPagination
 
 
-class TweetViewSet(viewsets.GenericViewSet,
-                   viewsets.mixins.CreateModelMixin,
-                   viewsets.mixins.ListModelMixin):
+class TweetViewSet(viewsets.GenericViewSet):
     """
     API endpoint that allows users to create, list tweets
     """
