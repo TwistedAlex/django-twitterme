@@ -40,6 +40,9 @@ class EndlessPagination(BasePagination):
         return reverse_ordered_list[index: index + self.page_size]
 
     def paginate_queryset(self, queryset, request, view=None):
+        if type(queryset) == list:
+            return self.paginate_ordered_list(queryset, request)
+
         if 'created_at__gt' in request.query_params:
             # created_at__gt 用于下拉刷新的时候加载最新的内容进来
             # 为了简便起见，下拉刷新不做翻页机制，直接加载所有更新的数据
