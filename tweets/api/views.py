@@ -8,6 +8,7 @@ from tweets.api.serializers import (
     TweetSerializerForDetail,
 )
 from tweets.models import Tweet
+from tweets.services import TweetService
 from utils.decorators import required_params
 from utils.paginations import EndlessPagination
 
@@ -60,18 +61,13 @@ class TweetViewSet(viewsets.GenericViewSet,
 
         # improvement 1: prefetch_related, get rid of N + 1 queries problem
         # improvement 2: cache
-        user_id = request.query_params['user_id']
-        tweets = Tweet.objects.filter(
-            user_id=user_id
-        ).prefetch_related('user').order_by('-created_at')
+        tweets = TweetService.get_cached_tweets(user_id=request.query_params['user_id'])
         tweets = self.paginate_queryset(tweets)
         serializer = TweetSerializer(
             tweets,
             context={'request': request},
             many=True,
         )
-        # 一般来说 json 格式的 response 默认都要用 hash 的格式
-        # 而不能用 list 的格式（约定俗成）
         return self.get_paginated_response(serializer.data)
 
     def create(self, request, *args, **kwargs):
