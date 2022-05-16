@@ -1,7 +1,8 @@
 from newsfeeds.models import NewsFeed
-from newsfeeds.tasks import fanout_newsfeeds_task
+from newsfeeds.tasks import fanout_newsfeeds_main_task
 from twitter.cache import USER_NEWSFEEDS_PATTERN
 from utils.redis_helper import RedisHelper
+
 
 class NewsFeedService(object):
 
@@ -19,7 +20,9 @@ class NewsFeedService(object):
         # 没有办法知道当前 web 进程的某片内存空间里的值是什么。
         # 所以我们只能把 tweet.id 作为参数传进去，而不能把 tweet 传进去。
         # 因为 celery 并不知道如何 serialize Tweet。
-        fanout_newsfeeds_task.delay(tweet.id)  # delay() 表示异步任务
+        # delay() 表示异步任务
+        fanout_newsfeeds_main_task.delay(tweet.id, tweet.user_id)
+        # tweet.user_id 不会产生额外数据库查询，tweet.user.id 会产生额外数据库查询
         # fanout_newsfeeds_task(tweet.id) # 同步任务
 
     @classmethod

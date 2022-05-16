@@ -37,6 +37,14 @@ class FriendshipService(object):
         ).prefetch_related('from_user')
         return [friendship.from_user for friendship in friendships]
 
+    # further improvement: Friendship.objects.filter(to_user_id=to_user_id)
+    # .values('from_user_id')
+    # select * -> select from_user_id
+    @classmethod
+    def get_follower_ids(cls, to_user_id):
+        friendships = Friendship.objects.filter(to_user_id=to_user_id)
+        return [friendship.from_user_id for friendship in friendships]
+
     @classmethod
     def get_following_user_id_set(cls, from_user_id):
         key = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
