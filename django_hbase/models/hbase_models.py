@@ -1,3 +1,4 @@
+from django.conf import settings
 from django_hbase.client import HBaseClient
 from django_hbase.models import HBaseField, BadRowKeyError, EmptyColumnError, IntegerField, TimestampField
 
@@ -127,9 +128,15 @@ class HBaseModel:
     @classmethod
     def get_table(cls):
         conn = HBaseClient.get_connection()
+        return conn.table(cls.get_table_name())
+
+    @classmethod
+    def get_table_name(cls):
         if not cls.Meta.table_name:
             raise NotImplementedError('Missing table_name in HBaseModel meta class')
-        return conn.table(cls.Meta.table_name)
+        if settings.TESTING:
+            return f'test_{cls.Meta.table_name}'
+        return cls.Meta.table_name
 
     def save(self):
         row_data = self.serialize_row_data(self.__dict__)
@@ -152,3 +159,30 @@ class HBaseModel:
         table = cls.get_table()
         row = table.row(row_key)
         return cls.init_from_row(row_key, row)
+
+    @classmethod
+    def create_table(cls):
+        if not settings.TESTING:
+            raise Exception('You cannot create table outside of unit tests')
+
+        conn = HBaseClient.get_connection()
+        # convert table name from bytes to str
+        tables = [table.decode('utf-8') for table in conn.tables()]
+
+        if cls.get_table_name() in tables:  # 已经创建好了
+            return
+
+        column_families = {
+            field.column_family: dict()
+            for key, field in cls.get_field_hash().items()
+            if field.column_family is not None  # 是 column_key
+        }
+        conn.create_table(cls.get_table_name(), column_families)
+
+    @classmethod
+    def drop_table(cls):
+        if not settings.TESTING:
+            raise Exception('You cannot drop table outside of unit tests')
+
+        conn = HBaseClient.get_connection()
+        conn.delete_table(cls.get_table_name(), True)
