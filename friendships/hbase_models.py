@@ -1,4 +1,6 @@
 from django_hbase import models
+from django.contrib.auth.models import User
+from utils.memcached_helper import MemcachedHelper
 
 
 class HBaseFollowing(models.HBaseModel):

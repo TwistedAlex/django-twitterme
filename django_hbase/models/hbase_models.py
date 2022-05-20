@@ -198,8 +198,8 @@ class HBaseModel:
 
     @classmethod
     def create_table(cls):
-        if not settings.TESTING:
-            raise Exception('You cannot create table outside of unit tests')
+        # if not settings.TESTING:
+        #     raise Exception('You cannot create table outside of unit tests')
 
         conn = HBaseClient.get_connection()
         # convert table name from bytes to str
