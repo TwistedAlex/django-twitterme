@@ -61,7 +61,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
     @method_decorator(ratelimit(key='user', rate='10/s', method='POST', block=True))
     def follow(self, request, pk):
-        self.get_object()
         # 特殊判断重复 follow 的情况（比如前端猛点好多少次 follow)
         # 静默处理，不报错，因为这类重复操作因为网络延迟的原因会比较多，没必要当做错误处理
         # check if user with id-pk exists
@@ -76,7 +75,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         # create friendship object
         serializer = FriendshipSerializerForCreate(data={
             'from_user_id': request.user.id,
-            'to_user_id': pk,
+            'to_user_id': to_follow_user.id,
         })
         # to make reduce the coding load for the following part
         # if the following valid part contains not a return but

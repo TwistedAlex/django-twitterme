@@ -37,9 +37,10 @@ class TestCase(DjangoTestCase):
         RedisClient.clear()
         caches['testing'].clear()
 
-    # open the switch for hbase
-    # 测试时手动 comment / uncomment
-    # GateKeeper.set_kv('switch_friendship_to_hbase', 'percent', 100)
+        # open the switch for hbase
+        # 测试时手动 comment / uncomment
+        GateKeeper.set_kv('switch_friendship_to_hbase', 'percent', 100)
+
     @property
     def anonymous_client(self):
         # wrong implementation: APIClient()

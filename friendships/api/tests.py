@@ -31,7 +31,15 @@ class FriendshipApiTests(TestCase):
             following = self.create_user('bob_following{}'.format(i))
             self.create_friendship(from_user=self.bob, to_user=following)
 
-    def _test_follow(self):
+    # def test_follow(self):
+    #     # test in mysql
+    #     self._test_follow()
+    #     self.clear_cache()
+    #     GateKeeper.set_kv('switch_friendship_to_hbase', 'percent', 100)
+    #     # test in hbase
+    #     self._test_follow()
+
+    def test_follow(self):
         url = FOLLOW_URL.format(self.alex.id)
 
         # 验证需要登录才能 follow 别人
