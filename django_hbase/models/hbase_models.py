@@ -197,6 +197,12 @@ class HBaseModel:
         return results
 
     @classmethod
+    def delete(cls, **kwargs):
+        row_key = cls.serialize_row_key(kwargs)
+        table = cls.get_table()
+        return table.delete(row_key)
+
+    @classmethod
     def create_table(cls):
         # if not settings.TESTING:
         #     raise Exception('You cannot create table outside of unit tests')

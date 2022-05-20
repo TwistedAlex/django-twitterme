@@ -7,6 +7,8 @@ from django_hbase.models import HBaseModel
 from friendships.models import Friendship
 from likes.models import Like
 from newsfeeds.models import NewsFeed
+from friendships.services import FriendshipService
+from gatekeeper.models import GateKeeper
 from rest_framework.test import APIClient
 from tweets.models import Tweet
 from utils.redis_client import RedisClient
@@ -35,6 +37,9 @@ class TestCase(DjangoTestCase):
         RedisClient.clear()
         caches['testing'].clear()
 
+    # open the switch for hbase
+    # 测试时手动 comment / uncomment
+    # GateKeeper.set_kv('switch_friendship_to_hbase', 'percent', 100)
     @property
     def anonymous_client(self):
         # wrong implementation: APIClient()
@@ -56,7 +61,10 @@ class TestCase(DjangoTestCase):
         return User.objects.create_user(username, email, password)
 
     def create_friendship(self, from_user, to_user):
-        return Friendship.objects.create(from_user=from_user, to_user=to_user)
+        return FriendshipService.follow(
+            from_user_id=from_user.id,
+            to_user_id=to_user.id
+        )
 
     def create_tweet(self, user, content=None):
         if content is None:

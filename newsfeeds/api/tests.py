@@ -25,7 +25,7 @@ def _paginate_to_get_newsfeeds(client):
 class NewsFeedApiTests(TestCase):
 
     def setUp(self):
-        self.clear_cache()
+        super(NewsFeedApiTests, self).setUp()
         self.alex = self.create_user('alex')
         self.alex_client = APIClient()
         self.alex_client.force_authenticate(self.alex)
