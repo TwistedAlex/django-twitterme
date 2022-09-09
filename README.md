@@ -79,7 +79,7 @@ Endless Pagination![image](https://user-images.githubusercontent.com/40569707/18
 `POST /api/notifications/mark-all-as-read/` <br />
 `PUT /api/notifications/:notification_id`    <br />
 
-## Happybase Module
+## django_hbase Module
 
   Django Rest Framework alike ORM to access hbase.<br />
   
